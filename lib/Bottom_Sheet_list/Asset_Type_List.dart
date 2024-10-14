@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-void ProductDepartmentBottomSheet(BuildContext context, Function(String) onItemSelected) {
-  final List<String> dataList = List.generate(17, (index) => 'data $index');
+void AssetTypeBottomSheet(BuildContext context, Function(String) onItemSelected) {
+  final List<String> dataList = List.generate(17, (index) => 'Asset data $index');
   String searchQuery = '';
 
   showModalBottomSheet(
@@ -36,7 +36,7 @@ void ProductDepartmentBottomSheet(BuildContext context, Function(String) onItemS
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        "Pick Product Department",
+                        "Choose Asset Type",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),

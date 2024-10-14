@@ -1,6 +1,10 @@
+import 'package:eassets/User/user_page.dart';
+import 'package:eassets/add.dart';
 import 'package:eassets/equipment.dart';
 import 'package:eassets/list.dart';
+import 'package:eassets/loginscreen.dart';
 import  'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ComplaintScreen1 extends StatefulWidget {
 
@@ -14,11 +18,13 @@ class _ComplaintScreen1State extends State<ComplaintScreen1> {
       "title":'Track Assets',
       'number':" 115",
       "icon": Icons.biotech,
-},
+      "Navigation" : ListScreen()
+    },
     {
       "title":'Track Technician',
       'number':"115",
-      "icon": Icons.group
+      "icon": Icons.group,
+      "Navigation" : CreateAssetScreen()
     },
     {
       "title":'Track Assset',
@@ -40,9 +46,18 @@ class _ComplaintScreen1State extends State<ComplaintScreen1> {
       'number':"115",
       "icon": Icons.biotech
     },
-
-
 ];
+
+  Future<void> logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');  // Only remove the login status
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()), // Redirect to login screen
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,11 +76,7 @@ class _ComplaintScreen1State extends State<ComplaintScreen1> {
                 Positioned(
                   top: 30,
                   left: 35,
-                  child: Icon(
-                    Icons.qr_code_scanner_outlined,
-                    color: Colors.white,
-                    size: 35,
-                  ),
+                  child: IconButton(onPressed: ()=> logout(context), icon:Icon(Icons.logout_sharp,color: Colors.white,))
                 ),
                 Positioned(
                   top: 30,
@@ -131,7 +142,7 @@ class _ComplaintScreen1State extends State<ComplaintScreen1> {
                         child:
                         ElevatedButton(
                           onPressed: () {
-
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => UserPage(status: '1',),));
                           },
                           child: Text("RAISED A COMPLAINT",style: TextStyle(fontSize: 18),),
                           ),
@@ -173,7 +184,7 @@ class _ComplaintScreen1State extends State<ComplaintScreen1> {
                             IconButton(
                               onPressed: () {
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>ListScreen()));
+                                    builder: (context) =>gridMap[index]['Navigation']));
                               },
                               icon: Icon(gridMap[index]['icon']),
                               iconSize: 47,

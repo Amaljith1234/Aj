@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-void CalibrationTypePDBottomSheet(BuildContext context, Function(String) onItemSelected) {
-  final List<String> dataList = List.generate(17, (index) => 'data $index');
+void DepartmentBottomSheet(BuildContext context, Function(String) onItemSelected) {
+  final List<String> dataList = List.generate(17, (index) => 'Department data $index');
   String searchQuery = '';
 
   showModalBottomSheet(

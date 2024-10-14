@@ -1,8 +1,11 @@
-
+import 'dart:convert';
+import 'package:eassets/loginscreen.dart';
+import 'package:http/http.dart' as http;
 import 'package:eassets/addEquipment.dart';
-import 'package:eassets/complaint.dart';
-import 'package:eassets/listscreen2.dart';
+import 'package:eassets/dio_client.dart';
+import 'package:eassets/urlscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListScreen extends StatefulWidget {
   @override
@@ -12,64 +15,95 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   bool _isSearching = false;
   TextEditingController _searchController = TextEditingController();
-  List<Map<String, String>> _filteredEquipmentList = [];
-
-
-  final List<Map<String, String>> equipmentList = [
-    {
-      "name": "036384 DELL",
-      "category": "007-Computers",
-      "date": "2024-09-08",
-      "id": "036384",
-
-    },
-    {
-      "name": "042591 HP",
-      "category": "010-Laptops",
-      "date": "2024-07-12",
-      "id": "042591",
-
-    },
-    {
-      "name": "052468 Lenovo",
-      "category": "012-Desktops",
-      "date": "2024-08-15",
-      "id": "052468",
-
-    },
-    {
-      "name": "0234067 Acer",
-      "category": "012-Desktops",
-      "date": "2024-08-15",
-      "id": "052468",
-
-    },
-    {
-      "name": "090876 Mac",
-      "category": "012-Desktops",
-      "date": "2024-08-15",
-      "id": "052468",
-
-    },
-  ];
+  List<Asset> _filteredEquipmentList = [];
+  List<Asset> _assets = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _filteredEquipmentList = List.from(equipmentList);
+    fetchAssets();
   }
 
-  void _filterEquipmentList(String query) {
-    if (query.isNotEmpty) {
+  // Function to fetch asset data from the API
+  Future<void> fetchAssets() async {
+    setState(() {
+      _isLoading = true; // Show loading spinner
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString(API_TOKEN);
+
+    if (token == null || token.isEmpty) {
       setState(() {
-        _filteredEquipmentList = equipmentList
-            .where((equipment) =>
-            equipment['name']!.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        _errorMessage = 'Token not found. Please log in again.';
+      });
+      print('Token not found or is empty');
+      return;
+    }
+
+    print('Token: $token');
+
+    try {
+      // Define the API URL
+      final String url = '${UrlConstantscreen.BASE_URL + UrlConstantscreen.ASSET_DATA_URL}';
+      print('API URL: $url');
+
+      // Set headers including the token
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      // Make the GET request
+      final response = await http.get(Uri.parse(url), headers: headers);
+
+      print("Response Status Code: ${response.statusCode}"); // Print the status code
+      print("Response Body: ${response.body}"); // Print the response body
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        if (jsonResponse['success']) {
+          setState(() {
+            _assets = (jsonResponse['data'] as List)
+                .map((asset) => Asset.fromJson(asset))
+                .toList();
+            _filteredEquipmentList = _assets;
+          });
+        } else {
+          setState(() {
+            _errorMessage = 'Failed to load assets: ${jsonResponse['message']}';
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = 'Error: ${response.statusCode} - ${response.reasonPhrase}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error fetching assets: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading spinner
+      });
+    }
+  }
+
+  // Function to filter assets based on the search input
+  void _filterAssets(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredEquipmentList = _assets;
       });
     } else {
       setState(() {
-        _filteredEquipmentList = List.from(equipmentList);
+        _filteredEquipmentList = _assets.where((asset) {
+          return asset.tagNo.toLowerCase().contains(query.toLowerCase()) ||
+              asset.assetId.toString().contains(query);
+        }).toList();
       });
     }
   }
@@ -93,7 +127,7 @@ class _ListScreenState extends State<ListScreen> {
           ),
           style: TextStyle(color: Colors.white, fontSize: 18),
           onChanged: (value) {
-            _filterEquipmentList(value);
+            _filterAssets(value);
           },
         )
             : Text(
@@ -109,83 +143,49 @@ class _ListScreenState extends State<ListScreen> {
               setState(() {
                 _isSearching = false;
                 _searchController.clear();
-                _filteredEquipmentList = List.from(equipmentList);
+                _filterAssets(''); // Reset filter
               });
             },
           )
               : IconButton(
-            icon: Icon(Icons.search,color: Colors.white,),
+            icon: Icon(Icons.search, color: Colors.white),
             onPressed: () {
               setState(() {
                 _isSearching = true;
               });
             },
           ),
-          IconButton(onPressed: () {
-            {}
-          }, icon:Icon(Icons.filter_alt_outlined,color: Colors.white,) )
+          IconButton(
+              onPressed: () {
+                // Add your filter logic here
+              },
+              icon: Icon(Icons.filter_alt_outlined, color: Colors.white))
         ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                height: 38,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(5),
-                    topLeft: Radius.circular(5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Total Equipments",
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "${_filteredEquipmentList.length}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Column(
-                children: _filteredEquipmentList.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  Map<String, String> equipment = entry.value;
-
-                  return EquipmentCard(
-                    name: equipment['name']!,
-                    category: equipment['category']!,
-                    fromDate: equipment['date']!,
-                    identification: equipment['id']!,
-                    cardColor: (index == 1 || index ==3)? Colors.white : Colors.white70,
-                  );
-                }).toList(),
-              ),
-
-            ],
-          ),
-        ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator()) // Loading spinner
+          : _errorMessage.isNotEmpty
+          ? Center(child: Text(_errorMessage)) // Show error message
+          : _filteredEquipmentList.isEmpty
+          ? Center(child: Text('No assets found.'))
+          : ListView.builder(
+        itemCount: _filteredEquipmentList.length,
+        itemBuilder: (context, index) {
+          final asset = _filteredEquipmentList[index];
+          return ListTile(
+            title: Text('Asset ID: ${asset.assetId}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tag No: ${asset.tagNo}'),
+                Text('Service Date: ${asset.serviceDate}'),
+                Text('Opening Cost: ${asset.openingCost.toStringAsFixed(2)}'),
+                Text('Closing Cost: ${asset.closingCost.toStringAsFixed(2)}'),
+              ],
+            ),
+            isThreeLine: true,
+          );
+        },
       ),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
@@ -195,12 +195,40 @@ class _ListScreenState extends State<ListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => AddDart()));
+              builder: (context) => AddDart())); // Replace with your add page
         },
-        child: Icon(Icons.add,color: Colors.white,),
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
         backgroundColor: Colors.indigo,
-
       ),
+    );
+  }
+}
+
+class Asset {
+  final int assetId;
+  final String tagNo;
+  final String serviceDate;
+  final double openingCost;
+  final double closingCost;
+
+  Asset({
+    required this.assetId,
+    required this.tagNo,
+    required this.serviceDate,
+    required this.openingCost,
+    required this.closingCost,
+  });
+
+  factory Asset.fromJson(Map<String, dynamic> json) {
+    return Asset(
+      assetId: json['asset_id'],
+      tagNo: json['tag_no'],
+      serviceDate: json['service_date'],
+      openingCost: json['opening_cost'].toDouble(),
+      closingCost: json['closing_cost'].toDouble(),
     );
   }
 }

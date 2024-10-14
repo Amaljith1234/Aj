@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-void ProductModelBottomSheet(BuildContext context, Function(String) onItemSelected) {
-  final List<String> dataList = List.generate(17, (index) => 'data $index');
+void LocationBottomSheet(BuildContext context, Function(String) onItemSelected) {
+  final List<String> dataList = List.generate(17, (index) => 'Location data $index');
   String searchQuery = '';
 
   showModalBottomSheet(
@@ -36,7 +36,7 @@ void ProductModelBottomSheet(BuildContext context, Function(String) onItemSelect
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        "Pick Product Department",
+                        "Choose Location",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),

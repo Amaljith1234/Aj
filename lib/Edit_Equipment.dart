@@ -1,8 +1,8 @@
-import 'package:eassets/Bottom_Sheet_list/CalibrationType_Department_List.dart';
-import 'package:eassets/Bottom_Sheet_list/Equipment_Category_List.dart';
-import 'package:eassets/Bottom_Sheet_list/Product_Department_List.dart';
-import 'package:eassets/Bottom_Sheet_list/Product_Model_List.dart';
-import 'package:eassets/Bottom_Sheet_list/ServiceType_ProductDepartment_List.dart';
+import 'package:eassets/Bottom_Sheet_list/Department_List.dart';
+import 'package:eassets/Bottom_Sheet_list/Major_category_List.dart';
+import 'package:eassets/Bottom_Sheet_list/Minor_Category_List.dart';
+import 'package:eassets/Bottom_Sheet_list/Asset_Type_List.dart';
+import 'package:eassets/Bottom_Sheet_list/Location_List.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -84,9 +84,9 @@ class _AddDartState extends State<EditEquipment> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          EquipmentCategoryBottomSheet(context, (item) {
+                          EquipmentCategoryBottomSheet(context, (categoryName, categoryId) {
                             setState(() {
-                              selectedItem = item;
+                              selectedItem = categoryName;
                             });
                           });
                         },
@@ -207,7 +207,7 @@ class _AddDartState extends State<EditEquipment> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          ProductDepartmentBottomSheet(context, (item) {
+                          MinorCategoryBottomSheet(context, (item) {
                             setState(() {
                               selectedItem1 = item;
                             });
@@ -253,7 +253,7 @@ class _AddDartState extends State<EditEquipment> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          ProductModelBottomSheet(context, (item) {
+                          AssetTypeBottomSheet(context, (item) {
                             setState(() {
                               selectedItem2 = item;
                             });
@@ -1234,7 +1234,7 @@ class _AddDartState extends State<EditEquipment> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            ServiceTypePDBottomSheet(context, (item) {
+                            LocationBottomSheet(context, (item) {
                               setState(() {
                                 selectedItem3 = item;
                               });
@@ -1347,7 +1347,7 @@ class _AddDartState extends State<EditEquipment> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            CalibrationTypePDBottomSheet(context, (item) {
+                            DepartmentBottomSheet(context, (item) {
                               setState(() {
                                 selectedItem4 = item;
                               });

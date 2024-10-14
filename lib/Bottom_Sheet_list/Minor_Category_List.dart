@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-void EquipmentCategoryBottomSheet(BuildContext context, Function(String) onItemSelected) {
-  final List<String> dataList = List.generate(17, (index) => 'data $index');
+void MinorCategoryBottomSheet(BuildContext context, Function(String) onItemSelected) {
+  final List<String> dataList = List.generate(17, (index) => 'Minor data $index');
   String searchQuery = '';
 
   showModalBottomSheet(
@@ -36,7 +36,7 @@ void EquipmentCategoryBottomSheet(BuildContext context, Function(String) onItemS
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        "Pick Equipment Category",
+                        "Select Minor Category",
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
